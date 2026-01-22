@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { getAlgorithm, getDefaultConfig } from '../core/registry';
-import { Optimizer, IterationState, ContinuousSolution, HyperparameterDef } from '../core/types';
+import { getAlgorithm } from '../core/registry';
+import { testFunctions } from '../core/test-functions';
+import { Optimizer, IterationState, ContinuousSolution, HyperparameterDef, Continuous2DConfig } from '../core/types';
 
 interface UseOptimizerReturn {
     optimizer: Optimizer<ContinuousSolution> | null;
@@ -14,6 +15,14 @@ interface UseOptimizerReturn {
     hyperparamValues: Record<string, number>;
     setHyperparam: (key: string, value: number) => void;
     resetHyperparams: () => void;
+    // Test function controls
+    currentFunctionId: string;
+    setFunction: (id: string) => void;
+    // Shared tuning controls
+    populationSize: number;
+    setPopulationSize: (size: number) => void;
+    maxIterations: number;
+    setMaxIterations: (count: number) => void;
 }
 
 /**
@@ -29,6 +38,9 @@ function getDefaultHyperparams(defs: HyperparameterDef[]): Record<string, number
 
 export function useOptimizer(): UseOptimizerReturn {
     const [currentAlgoId, setCurrentAlgoId] = useState('bat-standard');
+    const [currentFunctionId, setCurrentFunctionId] = useState('rastrigin');
+    const [populationSize, setPopulationSize] = useState(30);
+    const [maxIterations, setMaxIterations] = useState(100);
     const [history, setHistory] = useState<IterationState<ContinuousSolution>[]>([]);
     const [hyperparamValues, setHyperparamValues] = useState<Record<string, number>>({});
     const optimizerRef = useRef<Optimizer<ContinuousSolution> | null>(null);
@@ -48,19 +60,32 @@ export function useOptimizer(): UseOptimizerReturn {
 
     const runOptimization = useCallback(() => {
         const algo = getAlgorithm(currentAlgoId);
-        if (!algo) return;
+        const func = testFunctions[currentFunctionId];
+        if (!algo || !func) return;
 
-        const config = getDefaultConfig();
+        // Build config with selected function and settings
+        const config: Continuous2DConfig = {
+            populationSize,
+            type: 'continuous',
+            dimensions: 2,
+            bounds: func.bounds,
+            objectiveFunction: func.func2D
+        };
+
         // Pass hyperparameters to the create function
         const optimizer = algo.create(config, hyperparamValues);
-        optimizer.run(100);
+        optimizer.run(maxIterations);
 
         optimizerRef.current = optimizer;
         setHistory(optimizer.getHistory());
-    }, [currentAlgoId, hyperparamValues]);
+    }, [currentAlgoId, currentFunctionId, populationSize, maxIterations, hyperparamValues]);
 
     const selectAlgorithm = useCallback((id: string) => {
         setCurrentAlgoId(id);
+    }, []);
+
+    const setFunction = useCallback((id: string) => {
+        setCurrentFunctionId(id);
     }, []);
 
     const setHyperparam = useCallback((key: string, value: number) => {
@@ -72,10 +97,10 @@ export function useOptimizer(): UseOptimizerReturn {
         setHyperparamValues(defaults);
     }, [hyperparameters]);
 
-    // Run optimization when algorithm changes
+    // Run optimization when algorithm or function changes
     useEffect(() => {
         runOptimization();
-    }, [currentAlgoId, runOptimization]);
+    }, [currentAlgoId, currentFunctionId, runOptimization]);
 
     return {
         optimizer: optimizerRef.current,
@@ -87,6 +112,12 @@ export function useOptimizer(): UseOptimizerReturn {
         hyperparameters,
         hyperparamValues,
         setHyperparam,
-        resetHyperparams
+        resetHyperparams,
+        currentFunctionId,
+        setFunction,
+        populationSize,
+        setPopulationSize,
+        maxIterations,
+        setMaxIterations
     };
 }

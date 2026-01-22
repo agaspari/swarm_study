@@ -1,4 +1,4 @@
-import { SkipBack, Rewind, Pause, Play, FastForward } from 'lucide-react';
+import { SkipBack, Rewind, Pause, Play, FastForward, Users, Hash } from 'lucide-react';
 
 interface ControlsProps {
     isPlaying: boolean;
@@ -11,6 +11,10 @@ interface ControlsProps {
     onFrameChange: (frame: number) => void;
     onSpeedChange: (speed: number) => void;
     onRunOptimization: () => void;
+    populationSize: number;
+    onPopulationSizeChange: (size: number) => void;
+    maxIterations: number;
+    onMaxIterationsChange: (count: number) => void;
 }
 
 export function Controls({
@@ -23,10 +27,54 @@ export function Controls({
     onNextFrame,
     onFrameChange,
     onSpeedChange,
-    onRunOptimization
+    onRunOptimization,
+    populationSize,
+    onPopulationSizeChange,
+    maxIterations,
+    onMaxIterationsChange
 }: ControlsProps) {
     return (
         <div className="controls-panel">
+            <div className="control-group">
+                <label className="control-label">
+                    <Users size={12} /> POPULATION SIZE
+                </label>
+                <div className="frame-control">
+                    <input
+                        type="range"
+                        min={10}
+                        max={100}
+                        step={5}
+                        value={populationSize}
+                        onChange={(e) => onPopulationSizeChange(parseInt(e.target.value))}
+                    />
+                    <span className="control-value">{populationSize}</span>
+                </div>
+            </div>
+
+            <div className="control-group">
+                <label className="control-label">
+                    <Hash size={12} /> ITERATIONS
+                </label>
+                <div className="frame-control">
+                    <input
+                        type="range"
+                        min={50}
+                        max={500}
+                        step={25}
+                        value={maxIterations}
+                        onChange={(e) => onMaxIterationsChange(parseInt(e.target.value))}
+                    />
+                    <span className="control-value">{maxIterations}</span>
+                </div>
+            </div>
+
+            <div className="control-group">
+                <button id="btn-run" className="btn-run" onClick={onRunOptimization}>
+                    Run Optimization
+                </button>
+            </div>
+
             <div className="control-group">
                 <label className="control-label">PLAYBACK</label>
                 <div className="playback-controls">
@@ -64,12 +112,6 @@ export function Controls({
                     defaultValue={50}
                     onChange={(e) => onSpeedChange(parseInt(e.target.value))}
                 />
-            </div>
-
-            <div className="control-group">
-                <button id="btn-run" className="btn-run" onClick={onRunOptimization}>
-                    Run Optimization
-                </button>
             </div>
         </div>
     );

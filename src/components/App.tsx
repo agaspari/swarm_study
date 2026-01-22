@@ -5,8 +5,10 @@ import { Stats } from './Stats';
 import { AlgorithmInfo } from './AlgorithmInfo';
 import { Canvas } from './Canvas';
 import { HyperparameterPanel } from './HyperparameterPanel';
+import { TestFunctionSelector } from './TestFunctionSelector';
 import { useOptimizer } from '../hooks/useOptimizer';
 import { usePlayback } from '../hooks/usePlayback';
+import { testFunctions } from '../core/test-functions';
 
 export function App() {
     const {
@@ -18,7 +20,13 @@ export function App() {
         hyperparameters,
         hyperparamValues,
         setHyperparam,
-        resetHyperparams
+        resetHyperparams,
+        currentFunctionId,
+        setFunction,
+        populationSize,
+        setPopulationSize,
+        maxIterations,
+        setMaxIterations
     } = useOptimizer();
 
     const {
@@ -35,6 +43,7 @@ export function App() {
 
     const currentState = history[currentFrame];
     const maxFrame = Math.max(0, history.length - 1);
+    const currentFunc = testFunctions[currentFunctionId];
 
     return (
         <div className="app-container">
@@ -60,38 +69,46 @@ export function App() {
                             history={history}
                             currentFrame={currentFrame}
                             tweenProgress={tweenProgress}
+                            functionId={currentFunctionId}
                         />
                         <div className="legend">
                             <div className="legend-item">
                                 <span className="legend-dot agent"></span>
                                 <span>{currentAlgorithm?.agentName || 'Agent'}</span>
-                                <span className="legend-desc">Population members searching the space</span>
+                                <span className="legend-desc">Population members searching</span>
                             </div>
                             <div className="legend-item">
                                 <span className="legend-dot gbest"></span>
                                 <span>Global Best</span>
-                                <span className="legend-desc">Best solution found by the swarm so far</span>
+                                <span className="legend-desc">Best solution found so far</span>
                             </div>
                             <div className="legend-item">
                                 <span className="legend-dot optimal"></span>
-                                <span>Optimal (0,0)</span>
-                                <span className="legend-desc">True minimum of the {currentAlgorithm?.objectiveName || 'Rastrigin'} function</span>
+                                <span>Optimal</span>
+                                <span className="legend-desc">
+                                    ({currentFunc?.globalMinimum.x.join(', ')}) = {currentFunc?.globalMinimum.f}
+                                </span>
                             </div>
                             <div className="legend-item legend-heatmap">
                                 <span className="legend-gradient"></span>
-                                <span>Fitness Landscape</span>
+                                <span>{currentFunc?.name || 'Function'}</span>
                                 <span className="legend-desc">Blue = low (better), Red = high (worse)</span>
                             </div>
                         </div>
                     </div>
 
                     <aside className="info-panel">
+                        <TestFunctionSelector
+                            currentFunction={currentFunctionId}
+                            onChange={setFunction}
+                        />
+
                         {currentState && (
                             <Stats
                                 iteration={currentState.iteration}
                                 bestFitness={currentState.globalBestFitness}
                                 bestPosition={[currentState.globalBest[0], currentState.globalBest[1]]}
-                                functionName={currentAlgorithm?.objectiveName || 'Rastrigin'}
+                                functionName={currentFunc?.name || 'Rastrigin'}
                             />
                         )}
 
@@ -113,6 +130,10 @@ export function App() {
                             onFrameChange={setFrame}
                             onSpeedChange={setSpeed}
                             onRunOptimization={runOptimization}
+                            populationSize={populationSize}
+                            onPopulationSizeChange={setPopulationSize}
+                            maxIterations={maxIterations}
+                            onMaxIterationsChange={setMaxIterations}
                         />
                     </aside>
                 </div>

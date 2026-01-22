@@ -497,6 +497,137 @@ body {
   line-height: 1.5;
 }
 
+/* ===========================================
+   TEST FUNCTION SELECTOR 
+   =========================================== */
+
+.function-selector {
+  position: relative;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+}
+
+.function-selector-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.function-selector-toggle:hover {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.function-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.function-name {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.function-desc {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  color: var(--text-secondary);
+  transition: transform 0.2s;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+.function-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  margin-top: 4px;
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.function-option {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.function-option:hover {
+  background: var(--bg-tertiary);
+}
+
+.function-option.active {
+  background: var(--accent);
+}
+
+.function-option-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.function-option-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.function-bounds {
+  font-size: 0.7rem;
+  color: var(--accent-light);
+  font-family: 'Consolas', monospace;
+}
+
+.function-option.active .function-bounds {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.function-option-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.function-option.active .function-option-desc {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.function-optimal {
+  font-size: 0.65rem;
+  color: var(--success);
+  font-family: 'Consolas', monospace;
+}
+
+.function-option.active .function-optimal {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 /* Stats Panel */
 .stats-panel {
   padding: 1rem;

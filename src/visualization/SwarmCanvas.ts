@@ -27,6 +27,16 @@ export class SwarmCanvas {
         window.addEventListener('resize', () => this.resize());
     }
 
+    /**
+     * Update the test function and regenerate landscape
+     */
+    public setFunction(func: ObjectiveFunction2D, bounds: { min: number; max: number }): void {
+        this.func = func;
+        this.bounds = [bounds.min, bounds.max];
+        this.generateLandscape();
+        this.clearTrail();
+    }
+
     private resize(): void {
         const rect = this.canvas.parentElement?.getBoundingClientRect();
         if (!rect) return;

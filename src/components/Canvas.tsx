@@ -1,15 +1,17 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { SwarmCanvas } from '../visualization/SwarmCanvas';
 import { IterationState, ContinuousSolution } from '../core/types';
+import { testFunctions } from '../core/test-functions';
 
 interface CanvasProps {
     history: IterationState<ContinuousSolution>[];
     currentFrame: number;
     tweenProgress: number;
+    functionId: string;
     onCanvasReady?: (canvas: SwarmCanvas) => void;
 }
 
-export function Canvas({ history, currentFrame, tweenProgress, onCanvasReady }: CanvasProps) {
+export function Canvas({ history, currentFrame, tweenProgress, functionId, onCanvasReady }: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const swarmCanvasRef = useRef<SwarmCanvas | null>(null);
 
@@ -20,6 +22,14 @@ export function Canvas({ history, currentFrame, tweenProgress, onCanvasReady }: 
             onCanvasReady?.(swarmCanvasRef.current);
         }
     }, [onCanvasReady]);
+
+    // Update function when it changes
+    useEffect(() => {
+        if (swarmCanvasRef.current && testFunctions[functionId]) {
+            const func = testFunctions[functionId];
+            swarmCanvasRef.current.setFunction(func.func2D, func.bounds);
+        }
+    }, [functionId]);
 
     // Render current state
     useEffect(() => {
