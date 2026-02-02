@@ -163,6 +163,18 @@ export const registry: ChapterGroup[] = [
                 objectiveName: 'Rastrigin',
                 hyperparameters: [
                     {
+                        type: 'enum',
+                        key: 'chaosMap',
+                        name: 'Chaos Map',
+                        description: 'Type of chaotic map used for frequency tuning. Different maps create different patterns of pseudo-random behavior.',
+                        options: [
+                            { value: 'logistic', label: 'Logistic', description: 'x_{n+1} = 4x(1-x), most common' },
+                            { value: 'tent', label: 'Tent', description: 'Piecewise linear, tent-shaped' },
+                            { value: 'sine', label: 'Sine', description: 'x_{n+1} = sin(πx), smooth transitions' }
+                        ],
+                        defaultValue: 'logistic'
+                    },
+                    {
                         key: 'levyBeta',
                         name: 'Lévy β Parameter',
                         description: 'Controls the Lévy flight distribution (β ∈ [1,2]). β=1.0 = Cauchy distribution (very heavy tails, large jumps). β=2.0 = Gaussian (normal random walk). β=1.5 is a good balance.',
@@ -171,9 +183,8 @@ export const registry: ChapterGroup[] = [
                 ],
                 create: (config, hyperparams) => new ChaoticLevyBatAlgorithm({
                     ...config, ...defaultBatParams,
-                    chaosMap: 'logistic',
-                    levyBeta: 1.5,
-                    ...hyperparams
+                    chaosMap: (String(hyperparams?.chaosMap) as 'logistic' | 'tent' | 'sine') || 'logistic',
+                    levyBeta: Number(hyperparams?.levyBeta) || 1.5
                 } as ChaoticBatConfig)
             },
             {

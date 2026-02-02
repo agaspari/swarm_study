@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Settings, HelpCircle, RotateCcw } from 'lucide-react';
-import { HyperparameterDef } from '../core/types';
+import { HyperparameterDef, NumericHyperparameterDef, EnumHyperparameterDef } from '../core/types';
 
 interface HyperparameterPanelProps {
     hyperparameters: HyperparameterDef[];
-    values: Record<string, number>;
-    onChange: (key: string, value: number) => void;
+    values: Record<string, string | number>;
+    onChange: (key: string, value: string | number) => void;
     onReset: () => void;
 }
 
@@ -30,6 +30,83 @@ function Tooltip({ content, children }: TooltipProps) {
                 </div>
             )}
         </span>
+    );
+}
+
+function isEnumParam(param: HyperparameterDef): param is EnumHyperparameterDef {
+    return param.type === 'enum';
+}
+
+function NumericControl({
+    param,
+    value,
+    onChange
+}: {
+    param: NumericHyperparameterDef;
+    value: number;
+    onChange: (value: number) => void;
+}) {
+    return (
+        <>
+            <div className="hyperparam-label">
+                <span className="hyperparam-name">
+                    {param.name}
+                    <Tooltip content={param.description}>
+                        <HelpCircle size={14} className="help-icon" />
+                    </Tooltip>
+                </span>
+                <span className="hyperparam-value">
+                    {value.toFixed(2)}
+                </span>
+            </div>
+            <input
+                type="range"
+                min={param.min}
+                max={param.max}
+                step={param.step}
+                value={value}
+                onChange={(e) => onChange(parseFloat(e.target.value))}
+                className="hyperparam-slider"
+            />
+            <div className="hyperparam-range">
+                <span>{param.min}</span>
+                <span>{param.max}</span>
+            </div>
+        </>
+    );
+}
+
+function EnumControl({
+    param,
+    value,
+    onChange
+}: {
+    param: EnumHyperparameterDef;
+    value: string;
+    onChange: (value: string) => void;
+}) {
+    return (
+        <>
+            <div className="hyperparam-label">
+                <span className="hyperparam-name">
+                    {param.name}
+                    <Tooltip content={param.description}>
+                        <HelpCircle size={14} className="help-icon" />
+                    </Tooltip>
+                </span>
+            </div>
+            <select
+                className="hyperparam-select"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            >
+                {param.options.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                    </option>
+                ))}
+            </select>
+        </>
     );
 }
 
@@ -60,30 +137,19 @@ export function HyperparameterPanel({
                 <div className="hyperparameter-content">
                     {hyperparameters.map(param => (
                         <div key={param.key} className="hyperparam-control">
-                            <div className="hyperparam-label">
-                                <span className="hyperparam-name">
-                                    {param.name}
-                                    <Tooltip content={param.description}>
-                                        <HelpCircle size={14} className="help-icon" />
-                                    </Tooltip>
-                                </span>
-                                <span className="hyperparam-value">
-                                    {values[param.key]?.toFixed(2) ?? param.defaultValue.toFixed(2)}
-                                </span>
-                            </div>
-                            <input
-                                type="range"
-                                min={param.min}
-                                max={param.max}
-                                step={param.step}
-                                value={values[param.key] ?? param.defaultValue}
-                                onChange={(e) => onChange(param.key, parseFloat(e.target.value))}
-                                className="hyperparam-slider"
-                            />
-                            <div className="hyperparam-range">
-                                <span>{param.min}</span>
-                                <span>{param.max}</span>
-                            </div>
+                            {isEnumParam(param) ? (
+                                <EnumControl
+                                    param={param}
+                                    value={String(values[param.key] ?? param.defaultValue)}
+                                    onChange={(val) => onChange(param.key, val)}
+                                />
+                            ) : (
+                                <NumericControl
+                                    param={param}
+                                    value={Number(values[param.key] ?? param.defaultValue)}
+                                    onChange={(val) => onChange(param.key, val)}
+                                />
+                            )}
                         </div>
                     ))}
                     <button className="btn-reset-params" onClick={onReset}>

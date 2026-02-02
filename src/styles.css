@@ -659,6 +659,22 @@ body {
   font-family: 'Consolas', monospace;
 }
 
+/* Convergence Chart */
+.convergence-chart {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 0.5rem;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.convergence-chart canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+
 /* Controls Panel */
 .controls-panel {
   padding: 1rem;
@@ -759,7 +775,7 @@ input[type="range"]::-webkit-slider-thumb {
 .hyperparameter-panel {
   background: var(--bg-tertiary);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
 }
 
@@ -851,6 +867,33 @@ input[type="range"]::-webkit-slider-thumb {
   opacity: 0.7;
 }
 
+.hyperparam-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin: 0.25rem 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.hyperparam-select:hover {
+  border-color: var(--accent);
+}
+
+.hyperparam-select:focus {
+  outline: none;
+  border-color: var(--accent-light);
+}
+
+.hyperparam-select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 .btn-reset-params {
   display: flex;
   align-items: center;
@@ -882,6 +925,7 @@ input[type="range"]::-webkit-slider-thumb {
   position: relative;
   display: inline-flex;
   align-items: center;
+  z-index: 10;
 }
 
 .tooltip-content {
@@ -897,8 +941,8 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 0.75rem;
   line-height: 1.5;
   color: var(--text-primary);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  z-index: 9999;
   pointer-events: none;
 }
 
@@ -910,4 +954,504 @@ input[type="range"]::-webkit-slider-thumb {
   transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: var(--accent);
+}
+
+/* ===========================================
+   COMPARISON VIEW 
+   =========================================== */
+
+.comparison-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 2rem;
+}
+
+.comparison-modal {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--accent);
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.comparison-header h2 {
+  font-size: 1.25rem;
+  color: var(--accent-light);
+}
+
+.comparison-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.comparison-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.comparison-settings {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-tertiary);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.comparison-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.comparison-setting label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.comparison-setting select,
+.comparison-setting input {
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.btn-run-comparison {
+  padding: 0.5rem 1.5rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.btn-run-comparison:hover {
+  background: var(--accent-light);
+}
+
+.comparison-body {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  align-items: flex-start;
+}
+
+.comparison-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.comparison-algo-select {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comparison-algo-select select {
+  flex: 1;
+  padding: 0.5rem;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.algo-section-badge {
+  background: var(--accent);
+  color: white;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.comparison-canvas-wrapper {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.comparison-canvas-wrapper canvas {
+  width: 100%;
+  height: auto;
+  max-width: 350px;
+}
+
+.comparison-stats {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--success);
+  font-family: 'Consolas', monospace;
+}
+
+.comparison-vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent);
+  padding: 0 0.5rem;
+  align-self: center;
+}
+
+.comparison-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid var(--bg-tertiary);
+}
+
+.comparison-controls button {
+  background: var(--bg-tertiary);
+  border: none;
+  color: var(--text-primary);
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.comparison-controls button:hover {
+  background: var(--accent);
+}
+
+.comparison-controls .btn-play {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+}
+
+.frame-info {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-left: 1rem;
+}
+
+/* Compare Button */
+.btn-compare {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: 1px dashed var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent-light);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-compare:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-style: solid;
+}
+
+/* ===========================================
+   VIEW MODE TOGGLE
+   =========================================== */
+
+.view-mode-toggle {
+  display: flex;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.toggle-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* ===========================================
+   COMPARE VIEW
+   =========================================== */
+
+.compare-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem;
+  gap: 1rem;
+  overflow: auto;
+}
+
+.compare-settings-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.compare-settings-bar .setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compare-settings-bar .setting-group label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.compare-settings-bar .setting-group input {
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  width: 100px;
+}
+
+.compare-settings-bar .setting-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.compare-settings-bar .btn-run {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.compare-settings-bar .btn-run:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.compare-panels {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  min-height: 0;
+}
+
+.compare-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--accent);
+  padding: 0 0.5rem;
+}
+
+.compare-playback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: 10px;
+}
+
+.compare-playback button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.compare-playback button:hover {
+  background: var(--accent);
+}
+
+.compare-playback .btn-play {
+  width: 48px;
+  height: 48px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.compare-playback .btn-play:hover {
+  background: var(--accent-light);
+  transform: scale(1.05);
+}
+
+.compare-playback .speed-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 1rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.compare-playback .speed-control label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.compare-playback .speed-control input[type="range"] {
+  width: 100px;
+}
+
+.compare-playback .frame-info {
+  margin-left: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-family: 'Consolas', monospace;
+}
+
+/* ===========================================
+   ALGORITHM PANEL
+   =========================================== */
+
+.algorithm-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--bg-tertiary);
+  overflow: auto;
+  min-width: 300px;
+}
+
+.algorithm-panel .panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.algorithm-panel .algo-select {
+  flex: 1;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.algorithm-panel .algo-section-badge {
+  background: var(--accent);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.algorithm-panel .panel-canvas {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 0.5rem;
+  flex-shrink: 0;
+}
+
+.algorithm-panel .panel-canvas canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.algorithm-panel .panel-stats {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.algorithm-panel .best-fitness {
+  font-size: 0.9rem;
+  color: var(--success);
+  font-family: 'Consolas', monospace;
+  font-weight: 600;
+}
+
+/* Make hyperparameter panel more compact in compare view */
+.algorithm-panel .hyperparameter-panel {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.algorithm-panel .hyperparameter-panel .panel-header {
+  padding: 0.5rem;
+}
+
+.algorithm-panel .hyperparameter-list {
+  gap: 0.5rem;
 }

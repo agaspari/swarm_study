@@ -166,16 +166,30 @@ export interface AdaptiveSchedule {
 // REGISTRY TYPES
 // ============================================================================
 
-/** Hyperparameter definition for tunable algorithm parameters */
-export interface HyperparameterDef {
-    key: string;          // Parameter key (e.g., 'fMin', 'alpha')
-    name: string;         // Display name (e.g., 'Min Frequency')
-    description: string;  // Tooltip description
-    min: number;          // Minimum value
-    max: number;          // Maximum value
-    step: number;         // Step increment
-    defaultValue: number; // Default value
+/** Numeric hyperparameter with slider control */
+export interface NumericHyperparameterDef {
+    type?: 'number';  // Optional, defaults to 'number'
+    key: string;
+    name: string;
+    description: string;
+    min: number;
+    max: number;
+    step: number;
+    defaultValue: number;
 }
+
+/** Enum hyperparameter with dropdown control */
+export interface EnumHyperparameterDef {
+    type: 'enum';  // Required to distinguish from numeric
+    key: string;
+    name: string;
+    description: string;
+    options: Array<{ value: string; label: string; description?: string }>;
+    defaultValue: string;
+}
+
+/** Union type for all hyperparameter definitions */
+export type HyperparameterDef = NumericHyperparameterDef | EnumHyperparameterDef;
 
 /** Algorithm variant definition for the registry */
 export interface AlgorithmDefinition {

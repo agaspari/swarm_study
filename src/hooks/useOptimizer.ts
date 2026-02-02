@@ -12,8 +12,8 @@ interface UseOptimizerReturn {
     currentAlgorithm: ReturnType<typeof getAlgorithm> | undefined;
     // Hyperparameter controls
     hyperparameters: HyperparameterDef[];
-    hyperparamValues: Record<string, number>;
-    setHyperparam: (key: string, value: number) => void;
+    hyperparamValues: Record<string, string | number>;
+    setHyperparam: (key: string, value: string | number) => void;
     resetHyperparams: () => void;
     // Test function controls
     currentFunctionId: string;
@@ -28,8 +28,8 @@ interface UseOptimizerReturn {
 /**
  * Get default values from hyperparameter definitions
  */
-function getDefaultHyperparams(defs: HyperparameterDef[]): Record<string, number> {
-    const defaults: Record<string, number> = {};
+function getDefaultHyperparams(defs: HyperparameterDef[]): Record<string, string | number> {
+    const defaults: Record<string, string | number> = {};
     for (const def of defs) {
         defaults[def.key] = def.defaultValue;
     }
@@ -42,7 +42,7 @@ export function useOptimizer(): UseOptimizerReturn {
     const [populationSize, setPopulationSize] = useState(30);
     const [maxIterations, setMaxIterations] = useState(100);
     const [history, setHistory] = useState<IterationState<ContinuousSolution>[]>([]);
-    const [hyperparamValues, setHyperparamValues] = useState<Record<string, number>>({});
+    const [hyperparamValues, setHyperparamValues] = useState<Record<string, string | number>>({});
     const optimizerRef = useRef<Optimizer<ContinuousSolution> | null>(null);
 
     const currentAlgorithm = getAlgorithm(currentAlgoId);
@@ -58,6 +58,7 @@ export function useOptimizer(): UseOptimizerReturn {
         setHyperparamValues(defaults);
     }, [currentAlgoId, hyperparameters]);
 
+    // Define runOptimization at top level (NOT inside useEffect)
     const runOptimization = useCallback(() => {
         const algo = getAlgorithm(currentAlgoId);
         const func = testFunctions[currentFunctionId];
@@ -73,7 +74,7 @@ export function useOptimizer(): UseOptimizerReturn {
         };
 
         // Pass hyperparameters to the create function
-        const optimizer = algo.create(config, hyperparamValues);
+        const optimizer = algo.create(config, hyperparamValues as Record<string, any>);
         optimizer.run(maxIterations);
 
         optimizerRef.current = optimizer;
@@ -88,7 +89,7 @@ export function useOptimizer(): UseOptimizerReturn {
         setCurrentFunctionId(id);
     }, []);
 
-    const setHyperparam = useCallback((key: string, value: number) => {
+    const setHyperparam = useCallback((key: string, value: string | number) => {
         setHyperparamValues(prev => ({ ...prev, [key]: value }));
     }, []);
 
@@ -97,10 +98,15 @@ export function useOptimizer(): UseOptimizerReturn {
         setHyperparamValues(defaults);
     }, [hyperparameters]);
 
-    // Run optimization when algorithm or function changes
+    const hasRunRef = useRef(false);
+
+    // Run optimization once on mount (initial load)
     useEffect(() => {
-        runOptimization();
-    }, [currentAlgoId, currentFunctionId, runOptimization]);
+        if (!hasRunRef.current) {
+            runOptimization();
+            hasRunRef.current = true;
+        }
+    }, [runOptimization]);
 
     return {
         optimizer: optimizerRef.current,
